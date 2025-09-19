@@ -5,12 +5,18 @@ from reportlab.lib.pagesizes import A4
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib import colors
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from preprocess import process_raw_file
 
 # Get current date
 today = datetime.date.today()
 date_str = today.strftime("%Y-%m-%d")   # e.g. 2025-09-05
 
-# Define file path
+# Check for raw file first
+raw_file = Path("raw_data") / f"{date_str}.raw"
+if raw_file.exists():
+    process_raw_file(raw_file)
+
+# Define Python data file path
 data_file = Path("raw_data") / f"{date_str}.py"
 
 if not data_file.exists():
@@ -28,7 +34,7 @@ items_sorted = sorted(items, key=lambda x: x[0])
 # Create PDF in results folder
 results_dir = Path("results")
 results_dir.mkdir(exist_ok=True)  # Create the directory if it doesn't exist
-filename = results_dir / f"receipt_{date_str}_alphabetical.pdf"
+filename = str(results_dir / f"ostoskuitti_{date_str}_aakkosjarjestyksessa.pdf")  # Convert Path to string
 doc = SimpleDocTemplate(filename, pagesize=A4)
 elements = []
 
@@ -51,4 +57,4 @@ table.setStyle(TableStyle([
 elements.append(table)
 doc.build(elements)
 
-print(f"PDF created: {filename}")
+print(f"PDF luotu: {filename}")
