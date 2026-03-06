@@ -55,7 +55,8 @@ def format_quantity(qty: str) -> str:
 non_material_patterns = [
     r"^TOIMITUSMAKSU.*",
     r"^PANTTI.*",
-    r"^VERKKOK\.PAKKAUSMATERIAALIMAKSU.*"
+    r"^VERKKOK\.PAKKAUSMATERIAALIMAKSU.*",
+    r"^VERKKOKAUPPA-ALENNUS.*"
 ]
 
 material_items = []
