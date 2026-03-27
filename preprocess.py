@@ -25,10 +25,16 @@ def extract_items(raw_content: str) -> List[Tuple[str, str, str]]:
         
         if 'VÄLISUMMA' in line or 'YHTEENSÄ' in line:
             break
+
+        # Ignore indented campaign detail rows like:
+        # "  NORM.                      17,90"
+        # "  ALENNUS                   -10,10"
+        if re.match(r'^\s+(?:NORM\.|ALENNUS)\s+-?\d+,\d{2}\s*$', line):
+            continue
             
-        # Try to match a price at the end of the line (main product line).
-        # Support optional negative sign for discount rows, e.g. "... -10,00".
-        price_match = re.search(r'\s+(-?\d+,\d{2})$', line)
+        # Match only top-level rows (no leading indentation) that end with a price.
+        # This avoids treating indented helper rows as separate items.
+        price_match = re.match(r'^\S.*\s+(-?\d+,\d{2})\s*$', line)
         if price_match:
             product = line[:line.rfind(price_match.group(1))].strip()
             price = price_match.group(1) + ' €'
