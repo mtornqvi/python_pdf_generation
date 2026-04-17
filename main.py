@@ -11,8 +11,6 @@ from preprocess import process_raw_file
 # Get current date
 today = datetime.date.today()
 date_str = today.strftime("%Y-%m-%d")   # e.g. 2025-09-05
-# Format date in Finnish style (d.m.YYYY) without leading zeros
-date_str_fi = f"{today.day}.{today.month}.{today.year}"  # e.g. 26.9.2025
 
 # Check for raw file first
 raw_file = Path("raw_data") / f"{date_str}.raw"
@@ -23,7 +21,25 @@ if raw_file.exists():
 data_file = Path("raw_data") / f"{date_str}.py"
 
 if not data_file.exists():
-    raise FileNotFoundError(f"Data file not found: {data_file}")
+    candidates = []
+    for path in Path("raw_data").glob("*.py"):
+        try:
+            file_date = datetime.datetime.strptime(path.stem, "%Y-%m-%d").date()
+            if file_date <= today:
+                candidates.append((file_date, path))
+        except ValueError:
+            continue
+
+    if not candidates:
+        raise FileNotFoundError(f"Data file not found: {data_file}")
+
+    selected_date, data_file = max(candidates, key=lambda x: x[0])
+else:
+    selected_date = today
+
+date_str = selected_date.strftime("%Y-%m-%d")
+# Format date in Finnish style (d.m.YYYY) without leading zeros
+date_str_fi = f"{selected_date.day}.{selected_date.month}.{selected_date.year}"
 
 # Load items dynamically
 spec = importlib.util.spec_from_file_location("items_module", data_file)
